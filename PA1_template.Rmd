@@ -1,0 +1,96 @@
+---
+title: "Reproducible Research: Peer Assessment 1"
+output: 
+  html_document:
+    keep_md: true
+---
+
+
+## Loading and preprocessing the data
+Find data file in local branch of repo, unzip file and read as 'dat'
+
+```{r}
+        datfile <- unzip("~/GitHub/RepData1/RepData_PeerAssessment1/activity.zip")
+        dat <- read.csv("./activity.csv", stringsAsFactors = FALSE)
+```
+
+View file and make summary
+
+```{r}
+        head(dat)
+        summary(dat)
+```
+Prepare data for analysis - create 'day-of-the-week' variable 'dotw' 
+
+```{r}
+library(lubridate)
+        dat$dotw <- ymd(dat$date)
+        dat$dotw <- wday(dat$dotw)
+        head(dat)
+```
+
+
+## What is mean total number of steps taken per day?
+
+Find number of days in data set
+
+```{r}
+        days <- as.data.frame(unique(dat$date))
+        nrow(days)
+```
+To avoid duplicate days of the month, create unique day counter variable from date
+
+```{r}
+         dat$span <- interval(ymd("2012-10-01"), ymd(dat$date))
+         dat$daycount <- as.numeric(dat$span,"days") + 1
+         head(dat)
+```
+
+group dat by daycount and find total steps per day and plot histogram
+
+```{r}
+        library(dplyr)
+        fulldays <- group_by(dat, daycount)
+        totals <- summarise(fulldays, totsteps=sum(steps, na.rm = TRUE))
+        head(totals)
+        hist(totals$totsteps, main="Total Steps Per Day",xlab="Total Steps",ylab="Frequency", plot = TRUE)
+```
+
+find mean and median value of 'totals'
+
+```{r}
+        meantotsteps <- mean(totals$totsteps)
+        # mean total number of steps taken per day :
+        meantotsteps
+        mediantotsteps <- median(totals$totsteps)
+        # median total number of steps taken per day:
+        mediantotsteps
+                                
+```
+
+## What is the average daily activity pattern?
+
+Group by interval and calculate mean value for each interval.  Convert intervals to time for plotting. Plot mean v/s time of day to look for patterns.
+
+```{r}
+        inter <- group_by(dat, interval)  # group by interval
+        AvIntSteps <- summarise(inter, avSteps = mean(steps, na.rm = TRUE))  # calculate mean of each group
+        head(AvIntSteps)  # check data
+        ais <- AvIntSteps  # create shorter df name for easy typing!
+        ais$id <- seq.int(nrow(ais))  # create new column using index number
+        ais$int2 <- ais$id*5-5  # create new column showing minutes since mid-night
+        ais$hour <- ais$int2/60  # convert minutes to hours and decimals
+        head(ais)   # check data again
+        plot(ais$hour,ais$avSteps, main= "Activity Trend", xlab="time (hrs - 24hr clock)", ylab="Average Steps per 5 minute Increment")  # make simple scatter plot to detect trends
+        maxsteps <- max(ais$avSteps)  # find maximum value for average steps
+        maxint <- filter(ais, avSteps==maxsteps)  # find row where this occurs
+        maxint$interval    # display interval
+```
+
+The average daily activity pattern shows minimal activity during the late evening and night time hours, fairly constant activity throughout the day - with a pronounced spike from about 8:00 a.m.to 10:00 a.m.
+        
+## Imputing missing values
+
+
+
+## Are there differences in activity patterns between weekdays and weekends?
