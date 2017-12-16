@@ -91,6 +91,55 @@ The average daily activity pattern shows minimal activity during the late evenin
         
 ## Imputing missing values
 
+Find number of NAs in dat$steps and then check data frame to see if there are more in other columns
+
+```{r}
+
+        nodat <- sum(is.na(dat$steps))
+        # number of NAs in steps column is :
+        nodat
+        nodat2 <- sum(is.na(dat))
+        # total NAs in dat is :
+        nodat2
+```
+All the NAs are in the 'steps' column
+
+Substitute interval means for NAs.  Merge dfs 'dat' and 'ais' using interval and create new column of interval means 'intmean'.  Then create new steps2 column with NAs set to 'intmean'.  Analyse new data set.
+
+```{r}
+        dat$intmean <- ais$avSteps[match(dat$interval,ais$interval)] 
+        dmat <- as.matrix(dat)  #convert df to matrix
+        y <- which(is.na(dmat)==TRUE)  # identify all the NA rows
+        dmat[y] <- dmat[y,7]
+        head(dmat)
+        dat2 <- as.data.frame(dmat)
+             
+        fulldays2 <- group_by(dat2, daycount)
+        totals2 <- summarise(fulldays2, totsteps2=sum(as.numeric(steps)))
+        head(totals2)
+        hist(totals2$totsteps2, main="Total Steps Per Day (NA substituted)",xlab="Total Steps",ylab="Frequency", plot = TRUE)
+```
+
+
+Calculate the new mean and median of total steps per day
+
+```{r}
+
+        meantotsteps2 <- mean(as.numeric(totals2$totsteps2))
+        # mean total number of steps taken per day :
+        meantotsteps2
+        mediantotsteps2 <- median(as.numeric(totals2$totsteps2))
+        # median total number of steps taken per day:
+        mediantotsteps2
+
+```
+
+
+
+
+
+
+
 
 
 ## Are there differences in activity patterns between weekdays and weekends?
