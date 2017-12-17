@@ -128,18 +128,59 @@ Calculate the new mean and median of total steps per day
         meantotsteps2 <- mean(as.numeric(totals2$totsteps2))
         # mean total number of steps taken per day :
         meantotsteps2
-        mediantotsteps2 <- median(as.numeric(totals2$totsteps2))
+        mediantotsteps2 <- median(as.numeric(totals2$totsteps2hea))
         # median total number of steps taken per day:
         mediantotsteps2
 
 ```
 
-
-
-
-
-
-
-
-
 ## Are there differences in activity patterns between weekdays and weekends?
+
+Create two data sets for week (datW) and week end (datWE) by filtering dat2 based on day of the week (dotw).  Then use same process as earlier to 'group by' and take mean of intervals. 
+
+```{r}
+         datW <- filter(dat2, as.numeric(dotw) > 1 & as.numeric(dotw) < 7)
+         datWE <- filter(dat2, as.numeric(dotw) == 1 | as.numeric(dotw) == 7)
+
+        # start with week days
+         interW <- group_by(datW, interval)  # group by interval
+        AvIntStepsW <- summarise(interW, avStepsW = mean(as.numeric(steps)))  # calculate mean of each group
+        aisW <- AvIntStepsW  # create shorter df name for easy typing!
+        aisW$id <- seq.int(nrow(aisW))  # create new column using index number
+        aisW$int2 <- aisW$id*5-5  # create new column showing minutes since mid-night
+        aisW$hour <- aisW$int2/60  # convert minutes to hours and decimals
+        head(aisW)   # check data again
+        
+        # same process with weekend days
+        
+         interWE <- group_by(datWE, interval)  # group by interval
+        AvIntStepsWE <- summarise(interWE, avStepsWE = mean(as.numeric(steps)))  # calculate mean of each group
+        aisWE <- AvIntStepsWE  # create shorter df name for easy typing!
+        aisWE$id <- seq.int(nrow(aisWE))  # create new column using index number
+        aisWE$int2 <- aisWE$id*5-5  # create new column showing minutes since mid-night
+        aisWE$hour <- aisWE$int2/60  # convert minutes to hours and decimals
+        head(aisWE)   # check data again
+        
+        # create panel plot of W and WE means
+   
+        par(mfrow=c(2,1))
+        plot(aisW$hour,aisW$avStepsW, main= "Activity Trend - Weekday", xlab="time (hrs - 24hr clock)", ylab="Steps / 5 min")
+        plot(aisWE$hour,aisWE$avStepsWE, main= "Activity Trend - Weekend", xlab="time (hrs - 24hr clock)", ylab="Steps / 5 min")
+      
+```        
+
+        
+        
+       
+
+
+
+
+
+
+
+
+
+
+
+
